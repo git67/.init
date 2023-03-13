@@ -102,7 +102,7 @@ _run_playbook()
 
 	cd ${PLDIR}
 	#ansible-playbook ${PL} >/dev/null 2>&1
-	ansible-playbook ${PL} -e group_name=bootstrapnode
+	ansible-playbook ${PL} -e group_name=bootstrapnode --ask-become-pass >/dev/null 2>&1
 
 	deactivate
 
