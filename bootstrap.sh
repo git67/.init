@@ -1,4 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash 
+
+#set -x
 
 # ident "@(#)<bootstrap> <1.0>"
 #
@@ -97,8 +99,10 @@ _run_playbook()
 	fi
 	
 	source ${VENV}/bin/activate
+
 	cd ${PLDIR}
-	ansible-playbook ${PL} >/dev/null 2>&1
+	#ansible-playbook ${PL} >/dev/null 2>&1
+	ansible-playbook ${PL} -e group_name=bootstrapnode
 
 	deactivate
 
@@ -117,7 +121,7 @@ _create_ssh_key
 
 _create_python_venv 
 
-_run_playbook p_fast.yaml
+_run_playbook p_bootstrap.yml
 
 _line
 
