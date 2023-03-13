@@ -1,0 +1,54 @@
+---
+- name: "run"
+  hosts: "all"
+  gather_facts: false
+  any_errors_fatal: true
+  ignore_unreachable: false
+  become: false
+  vars:
+    pl_name: "p_fast.yml"
+
+  tasks:
+    - block:
+        - name: "debug"
+          ansible.builtin.debug:
+            msg: "{{ pl_name }}"
+
+        - name: "set fact for state"
+          ansible.builtin.set_fact:
+            dict_return_to_inubit: {
+                        'state1': 'val1', 
+                        'state2': 'val2' 
+                        }   
+            scalar_return_to_inubit: "for_raoul"
+
+        - name: "set special stat"
+          ansible.builtin.set_stats:
+            data:
+              inubit1: "{{ dict_return_to_inubit |default({'state1':'empty', 'state2':'empty'}) }}"
+              inubit2: "{{ scalar_return_to_inubit |default('empty') }}"
+            aggregate: false
+            per_host: false
+
+        - name: "create file"
+          ansible.builtin.file:
+            path: ./willi
+            state: touch
+            mode: u+rw,g-wx,o-rwx
+            modification_time: preserve
+            access_time: preserve
+
+        - name: "get from git"
+          ansible.builtin.git:
+            repo: https://github.com/git67/ansible-bootstrap.git
+            dest: "{{ lookup('env', 'PWD') }}/a"
+            single_branch: yes
+            version: master
+          environment:
+            GIT_TERMINAL_PROMPT: 0
+
+      rescue:
+        - name: "pre tasks {{ pl_name }} failed"
+          ansible.builtin.fail:
+            msg: "running rollback"
+

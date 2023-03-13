@@ -1,0 +1,95 @@
+# ident "@(#)<bootstrap> <1.0>"
+#
+# desc          : <Bootstrap User Env>
+# version       : <0.9>
+# dev           : <heiko.stein@etomer.com>
+#
+# changelog:
+#
+
+# var
+CFG=".bootstrap.cfg"
+
+# func
+_line()
+{
+	CHAR=${1:-"-"}
+	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' ${CHAR}
+}
+
+_print()
+{
+	STR=${1:-"undef"}
+	printf '\t%s\n' "${STR}"
+}
+
+_get_cfg()
+{
+	_print "Lese ${CFG} ein ..."
+
+	if [ ! -f ./${CFG} ] && [ -r ./${CFG} ];then
+        	_print "Konfigfile ${CFG} nicht vorhanden bzw. nicht lesbar."
+        	exit 1
+	else
+		. ./${CFG}
+	fi
+
+	_print "... ok"
+
+	return 0
+}
+
+_create_ssh_key()
+{
+	_print "Erzeuge SSH Keys, soweit noetig ..."
+	if [ ! -f "~/.ssh/id_rsa" ];then
+		ssh-keygen -t rsa -b 4096  -f ~/.ssh/id_rsa -q -N '' <<< n >/dev/null 2>&1
+	fi
+
+	FOUND=$(grep "$(cat  ~/.ssh/id_rsa.pub |awk '{print $2}')" ~/.ssh/authorized_keys)
+
+	if [ "x${FOUND}" != "x" ]; then
+		cat  ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+	fi
+
+	_print "... ok"
+
+	return 0
+}
+
+_create_python_venv()
+{
+	_print "_create_python_venv ..."
+
+	python3 -m venv ${VENV}
+
+	. ${VENV}/bin/activate
+
+	pip install -U pip
+
+	_print "... ok"
+
+	return 0
+}
+
+_clone_init_repo()
+{
+
+pip install ansible
+
+cd playbooks
+ansible-playbook p_fast.yaml 
+}
+
+# main
+set -e
+
+[ "$0" != "-bash" ] && _print "usage: . $(basename $0)" && exit 1
+
+_line
+_get_cfg
+_create_ssh_key && _create_python_venv
+_line
+
+set +e
+
