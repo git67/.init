@@ -5,9 +5,19 @@
     - copy_dot_files
 
   block:
-    - name: "list installed os"
-      ansible.builtin.debug:
-        msg: "{{  ansible_env.SUDO_USER }}"
+    - name: "set needed variables"
+      ansible.builtin.set_fact:
+        regular_user: {{  ansible_env.SUDO_USER }}
+        regular_hostname: {{  ansible_hostname }}
+        regular_homedir: {{ lookup('env','HOME') }}
+
+    - name: "template relevant files"
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ regular_homedir }}/{{ item.split('/')[-1] }}"
+        owner: "{{ regular_user }}"
+        mode: 0644
+      loop: "{{ lookup('fileglob', 'templates/*tpl', wantlist=True) }}"
 
   rescue:
     - name: "role {{ ansible_role_name }} failed"

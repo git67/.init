@@ -44,7 +44,7 @@
           ansible.builtin.include_role:
             name: r_copy_dot_files
           tags:
-            - r_copy_dot_files
+            - copy_dot_files
 
       rescue:
         - name: "task {{ pl_name }} failed"

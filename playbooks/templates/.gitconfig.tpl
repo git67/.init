@@ -1,7 +1,7 @@
 [user]
-	name = ${USERN}
-	email = ${USERN}@${HOSTN}.gisa.intern
-	username = ${USERN}
+	name = {{ regular_user }}
+	email = {{ regular_user }}@{{ regular_hostname }}.gisa.intern
+	username = {{ regular_user }}
 [core]
 	editor = vim
 	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol

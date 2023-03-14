@@ -13,10 +13,6 @@ set -euo pipefail
 
 # var
 CFG=".bootstrap.cfg"
-FOUND=""
-PLAYBOOK="p_bootstrap.yml"
-SILENT=${1:-'>/dev/null 2>&1'}
-CMD=""
 
 _line()
 {
