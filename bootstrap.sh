@@ -14,6 +14,7 @@
 # var
 CFG=".bootstrap.cfg"
 FOUND=""
+PLAYBOOK="p_bootstrap.yml"
 
 # func
 _line()
@@ -121,7 +122,7 @@ _create_ssh_key
 
 _create_python_venv 
 
-_run_playbook p_bootstrap.yml
+_run_playbook ${PLAYBOOK}
 
 _line
 

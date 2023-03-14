@@ -40,17 +40,12 @@
 
   tasks:
     - block:
-        - name: "role update all"
+        - name: "role copy dot files into users homedir"
           ansible.builtin.include_role:
-            name: r_update_all_{{ runtime_dist_flag }}
+            name: r_copy_dot_files
           tags:
-            - update_all
+            - r_copy_dot_files
 
-        - name: "role reboot nodes"
-          ansible.builtin.include_role:
-            name: r_reboot_nodes
-          tags:
-            - reboot_nodes
       rescue:
         - name: "task {{ pl_name }} failed"
           ansible.builtin.fail:

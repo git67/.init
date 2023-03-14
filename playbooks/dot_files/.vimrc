@@ -4,5 +4,3 @@ autocmd FileType py setlocal ts=4 sts=2 sw=2 expandtab autoident shiftwidth=4 cu
 
 let python_highlight_all = 1
 syntax enable
-set number
-set list
