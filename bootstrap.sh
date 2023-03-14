@@ -54,7 +54,8 @@ _create_ssh_key()
 	_print "Erzeuge SSH Keys, soweit noetig ..."
 	if [ ! -f "${HOME}/.ssh/id_rsa" ];then
 		_print "Erzeuge SSH Keys ..."
-		ssh-keygen -t rsa -b 4096  -f ~/.ssh/id_rsa -q -N '' <<< n >/dev/null 2>&1
+		CMD="ssh-keygen -t rsa -b 4096  -f ~/.ssh/id_rsa -q -N '' <<< n ${SILENT}"
+		eval "${CMD}"
 	fi
 
 	if [ -f ${HOME}/.ssh/authorized_keys ];then
