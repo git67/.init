@@ -1,8 +1,8 @@
 ---
-# tasks file for r_copy_dot_files
-- name: "copy dot files to {{ lookup('env','HOME') }}" 
+# tasks file for r_copy_files_2_homedir
+- name: "copy dot files to {{ lookup('env','HOME') }}"
   tags:
-    - copy_dot_files
+    - copy_files_2_homedir
 
   block:
     - name: "set needed variables"

@@ -42,9 +42,9 @@
     - block:
         - name: "role copy dot files into users homedir"
           ansible.builtin.include_role:
-            name: r_copy_dot_files
+            name: r_copy_files_2_homedir
           tags:
-            - copy_dot_files
+            - copy_files_2_homedir
 
       rescue:
         - name: "task {{ pl_name }} failed"

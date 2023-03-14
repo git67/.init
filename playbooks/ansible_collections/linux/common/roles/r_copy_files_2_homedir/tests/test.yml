@@ -2,4 +2,4 @@
 - hosts: localhost
   remote_user: root
   roles:
-    - r_copy_dot_files
+    - r_copy_files_2_homedir
