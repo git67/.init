@@ -13,6 +13,7 @@ set -euo pipefail
 
 # var
 CFG=".bootstrap.cfg"
+SILENT=${1:-'>/dev/null 2>&1'}
 
 _line()
 {

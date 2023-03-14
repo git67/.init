@@ -14,10 +14,12 @@
     - name: "template relevant files"
       ansible.builtin.template:
         src: "{{ item }}"
-        dest: "{{ regular_homedir }}/{{ item.split('/')[-1] }}"
+        dest: "{{ regular_homedir }}/{{ item.split('/')[-1]|regex_replace('.tpl','') }}"
         owner: "{{ regular_user }}"
         mode: 0644
-      loop: "{{ lookup('fileglob', 'templates/*tpl', wantlist=True) }}"
+      with_fileglob:
+        - 'templates/.*tpl'
+        - 'templates/*tpl'
 
   rescue:
     - name: "role {{ ansible_role_name }} failed"
