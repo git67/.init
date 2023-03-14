@@ -66,7 +66,6 @@ _create_ssh_key()
 	fi
 
 	if [ "x${FOUND}" == "x" ]; then
-		echo "rein"
 		cat  ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 		chmod 600 ~/.ssh/authorized_keys
 	fi

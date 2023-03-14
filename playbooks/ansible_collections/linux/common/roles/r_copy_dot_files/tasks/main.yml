@@ -1,13 +1,13 @@
 ---
 # tasks file for r_copy_dot_files
-- name: "copy dot files to {{ regular_home }}" 
+- name: "copy dot files to {{ lookup('env','HOME') }}" 
   tags:
     - copy_dot_files
 
   block:
     - name: "list installed os"
       ansible.builtin.debug:
-        msg: "{{ regular_user }} : {{ regular_home }}"
+        msg: "{{  ansible_env.SUDO_USER }}"
 
   rescue:
     - name: "role {{ ansible_role_name }} failed"
