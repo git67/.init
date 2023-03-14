@@ -11,7 +11,7 @@
         regular_hostname: {{  ansible_hostname }}
         regular_homedir: {{ lookup('env','HOME') }}
 
-    - name: "template relevant files"
+    - name: "template files to {{ regular_homedir }}"
       ansible.builtin.template:
         src: "{{ item }}"
         dest: "{{ regular_homedir }}/{{ item.split('/')[-1]|regex_replace('.tpl','') }}"
@@ -21,6 +21,15 @@
         - 'templates/.*tpl'
         - 'templates/*tpl'
 
+    - name: "copy files to {{ regular_homedir }}"
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ regular_homedir }}/{{ item.split('/')[-1] }}"
+        owner: "{{ regular_user }}"
+        mode: 0644
+      with_fileglob:
+        - 'files/.*'
+        - 'files/*'
   rescue:
     - name: "role {{ ansible_role_name }} failed"
       ansible.builtin.fail:
