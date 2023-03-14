@@ -18,8 +18,8 @@
         owner: "{{ regular_user }}"
         mode: 0644
       with_fileglob:
-        - 'data/templates/.*tpl'
-        - 'data/templates/*tpl'
+        - "{{ data_templates }}/.*tpl"
+        - "{{ data_templates }}/*tpl"
 
     - name: "copy files to {{ regular_homedir }}"
       ansible.builtin.copy:
@@ -28,8 +28,8 @@
         owner: "{{ regular_user }}"
         mode: 0644
       with_fileglob:
-        - 'data/files/.*'
-        - 'data/files/*'
+        - "{{ data_files }}/.*"
+        - "{{ data_files }}/*"
   rescue:
     - name: "role {{ ansible_role_name }} failed"
       ansible.builtin.fail:

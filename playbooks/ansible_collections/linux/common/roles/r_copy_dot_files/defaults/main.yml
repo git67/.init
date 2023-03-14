@@ -1,2 +1,4 @@
 ---
 # defaults file for r_copy_dot_files
+data_files: "data/files"
+data_templates: "data/templates"
