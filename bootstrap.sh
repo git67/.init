@@ -122,7 +122,6 @@ _line
 
 _get_cfg ${CFG}
 
-exit 1
 _create_ssh_key  
 
 _create_python_venv 
