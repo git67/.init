@@ -9,11 +9,34 @@ set -euo pipefail
 # dev           : <heiko.stein@etomer.com>
 #
 # changelog:
-#
+# ...
 
 # var
-CFG=".bootstrap.cfg"
+# globals
+PATH="${PATH}:/:/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin"
 SILENT=${1:-'>/dev/null 2>&1'}
+HOSTN=$(uname -n)
+USERN=$(whoami|cut -d \\ -f2)
+
+# shell
+BASEDIR="$(dirname $(realpath $0))"
+TPLDIR="${BASEDIR}/templates"
+
+# python venv
+VENVN=".pyv"
+VENV="$(cd;pwd)/${VENVN}"
+
+# ansible
+PLDIR="${BASEDIR}/playbooks"
+INVDIR="${PLDIR}/inventories"
+INVENTORY="${INVDIR}/hosts"
+INVENTORYTPL="${TPLDIR}/hosts.tpl"
+DATA="${PLDIR}/data"
+PLAYBOOK="p_bootstrap.yml"
+
+# helper
+CMD=""
+FOUND=""
 
 _line()
 {
@@ -25,25 +48,6 @@ _print()
 {
 	STR=${1:-"undef"}
 	printf '\t%s\n' "${STR}"
-}
-
-_get_cfg()
-{
-	_print "Konfig ..."
-
-	cd $(dirname $0)
-
-	FILE=${1:-"undef"}
-	
-	if [ ! -f ./${FILE} ] || [ ! -r ./${FILE} ];then
-        	_print "Konfigfile ${FILE} nicht vorhanden bzw. nicht lesbar."
-        	exit 1
-	else
-		_print "Lese ${CFG} ein ..."
-		source ./${FILE}
-	fi
-
-	_print "... ok"
 }
 
 _create_ssh_key()
@@ -91,6 +95,19 @@ _create_python_venv()
 	_print "... ok"
 }
 
+_template_ansible_inventory()
+{
+	_print "Template Ansible Inventory ..."
+	
+	mkdir -p ${INVDIR}
+	
+	envsubst < ${INVENTORYTPL} 	
+
+	_print "... ok"
+}
+
+
+
 _run_playbook()
 {
 	PL=${1:-"undef"}
@@ -124,11 +141,11 @@ _run_playbook()
 
 _line
 
-_get_cfg ${CFG}
-
 _create_ssh_key  
 
 _create_python_venv 
+
+_template_ansible_inventory
 
 _run_playbook ${PLAYBOOK}
 
