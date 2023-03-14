@@ -15,8 +15,8 @@ set -euo pipefail
 # globals
 PATH="${PATH}:/:/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin"
 SILENT=${1:-'>/dev/null 2>&1'}
-HOSTN=$(uname -n)
-USERN=$(whoami|cut -d \\ -f2)
+export HOSTN=$(uname -n)
+export USERN=$(whoami|cut -d \\ -f2)
 
 # shell
 BASEDIR="$(dirname $(realpath $0))"
@@ -101,7 +101,7 @@ _template_ansible_inventory()
 	
 	mkdir -p ${INVDIR}
 	
-	envsubst < ${INVENTORYTPL} 	
+	envsubst < ${INVENTORYTPL} > ${INVENTORY} 	
 
 	_print "... ok"
 }
@@ -125,7 +125,7 @@ _run_playbook()
 	
 	mkdir -p ${PLDIR}/log
 
-	CMD="ansible-playbook ${PL} -e group_name=bootstrapnode --ask-become-pass ${SILENT}"
+	CMD="ansible-playbook ${PL} -i ${INVENTORY} -e group_name=bootstrapnode --ask-become-pass ${SILENT}"
 	eval "${CMD}"
 
 	[ $? != 0 ] && _print "...Fehler bei ${CMD}" && exit 1	
