@@ -78,12 +78,12 @@ _create_python_venv()
 	_print "Aktiviere Python3 ${VENV} ..."
 	source ${VENV}/bin/activate
 
-	if [ ! -f ${CFGBASE}/pip/requirements.pip ] || [ ! -r ${CFGBASE}/pi/requirements.pip ];then
+	if [ ! -f ${DATA}/pip/requirements.pip ] || [ ! -r ${DATA}/pip/requirements.pip ];then
         	_print "Datei requirements.pip nicht vorhanden bzw. nicht lesbar."
         	exit 1
 	else
-		_print "Installiere ${CFGBASE}/pip/requirements.pip in ${VENV} ..."
-		pip install -qUr ${CFGBASE}/pip/requirements.pip
+		_print "Installiere ${DATA}/pip/requirements.pip in ${VENV} ..."
+		pip install -qUr ${DATA}/pip/requirements.pip
 	fi
 
 	deactivate
