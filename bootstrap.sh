@@ -12,9 +12,10 @@
 #
 
 # var
-CFG=${1:-".bootstrap.cfg"}
+CFG=".bootstrap.cfg"
 FOUND=""
 PLAYBOOK="p_bootstrap.yml"
+SILENT=${1:-'>/dev/null 2>&1'}
 
 # func
 _line()
@@ -107,7 +108,8 @@ _run_playbook()
 	
 	mkdir -p ${PLDIR}/log
 
-	ansible-playbook ${PL} -e group_name=bootstrapnode --ask-become-pass >/dev/null 2>&1
+	CMD="ansible-playbook ${PL} -e group_name=bootstrapnode --ask-become-pass ${SILENT}"
+	eval "${CMD}"
 
 	deactivate
 
