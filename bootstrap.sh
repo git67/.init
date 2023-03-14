@@ -1,6 +1,6 @@
 #!/usr/bin/env bash 
 
-#set -x
+set -euo pipefail
 
 # ident "@(#)<bootstrap> <1.0>"
 #
@@ -16,8 +16,8 @@ CFG=".bootstrap.cfg"
 FOUND=""
 PLAYBOOK="p_bootstrap.yml"
 SILENT=${1:-'>/dev/null 2>&1'}
+CMD=""
 
-# func
 _line()
 {
 	CHAR=${1:-"-"}
@@ -56,6 +56,9 @@ _create_ssh_key()
 		_print "Erzeuge SSH Keys ..."
 		CMD="ssh-keygen -t rsa -b 4096  -f ~/.ssh/id_rsa -q -N '' <<< n ${SILENT}"
 		eval "${CMD}"
+
+		[ $? != 0 ] && _print "...Fehler bei ${CMD}" && exit 1	
+
 	fi
 
 	if [ -f ${HOME}/.ssh/authorized_keys ];then
@@ -111,6 +114,8 @@ _run_playbook()
 
 	CMD="ansible-playbook ${PL} -e group_name=bootstrapnode --ask-become-pass ${SILENT}"
 	eval "${CMD}"
+
+	[ $? != 0 ] && _print "...Fehler bei ${CMD}" && exit 1	
 
 	deactivate
 
