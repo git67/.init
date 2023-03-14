@@ -15,6 +15,7 @@
 CFG=".bootstrap.cfg"
 FOUND=""
 PLAYBOOK="p_bootstrap.yml"
+SILENT=${1:-">/dev/null 2>&1"}
 
 # func
 _line()
@@ -51,7 +52,7 @@ _create_ssh_key()
 	_print "Erzeuge SSH Keys, soweit noetig ..."
 	if [ ! -f "${HOME}/.ssh/id_rsa" ];then
 		_print "Erzeuge SSH Keys ..."
-		ssh-keygen -t rsa -b 4096  -f ~/.ssh/id_rsa -q -N '' <<< n >/dev/null 2>&1
+		ssh-keygen -t rsa -b 4096  -f ~/.ssh/id_rsa -q -N '' <<< n ${SILENT}
 	fi
 
 	if [ -f ${HOME}/.ssh/authorized_keys ];then
@@ -102,8 +103,7 @@ _run_playbook()
 	source ${VENV}/bin/activate
 
 	cd ${PLDIR}
-	#ansible-playbook ${PL} >/dev/null 2>&1
-	ansible-playbook ${PL} -e group_name=bootstrapnode --ask-become-pass >/dev/null 2>&1
+	ansible-playbook ${PL} -e group_name=bootstrapnode --ask-become-pass ${SILENT}
 
 	deactivate
 

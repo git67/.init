@@ -1,0 +1,3 @@
+regular_user: "{{ ansible_env.SUDO_USER }}"
+regular_home: "{{ ansible_env.HOME }}"
+
