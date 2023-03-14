@@ -12,10 +12,9 @@
 #
 
 # var
-CFG=".bootstrap.cfg"
+CFG=${1:-".bootstrap.cfg"}
 FOUND=""
 PLAYBOOK="p_bootstrap.yml"
-SILENT=${1:-">/dev/null 2>&1"}
 
 # func
 _line()
@@ -33,6 +32,8 @@ _print()
 _get_cfg()
 {
 	_print "Konfig ..."
+
+	cd $(dirname $0)
 
 	FILE=${1:-"undef"}
 	
@@ -52,7 +53,7 @@ _create_ssh_key()
 	_print "Erzeuge SSH Keys, soweit noetig ..."
 	if [ ! -f "${HOME}/.ssh/id_rsa" ];then
 		_print "Erzeuge SSH Keys ..."
-		ssh-keygen -t rsa -b 4096  -f ~/.ssh/id_rsa -q -N '' <<< n ${SILENT}
+		ssh-keygen -t rsa -b 4096  -f ~/.ssh/id_rsa -q -N '' <<< n >/dev/null 2>&1
 	fi
 
 	if [ -f ${HOME}/.ssh/authorized_keys ];then
@@ -103,7 +104,10 @@ _run_playbook()
 	source ${VENV}/bin/activate
 
 	cd ${PLDIR}
-	ansible-playbook ${PL} -e group_name=bootstrapnode --ask-become-pass ${SILENT}
+	
+	mkdir -p ${PLDIR}/log
+
+	ansible-playbook ${PL} -e group_name=bootstrapnode --ask-become-pass >/dev/null 2>&1
 
 	deactivate
 
@@ -118,6 +122,7 @@ _line
 
 _get_cfg ${CFG}
 
+exit 1
 _create_ssh_key  
 
 _create_python_venv 
