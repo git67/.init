@@ -5,13 +5,18 @@
     - install_packages
 
   block:
-    - name: "debug"
-      ansible.builtin.debug:
-        msg: "{{ item.packages }}"
-      loop: "{{ lookup('file', 'data/packages/install.yaml') }}"
+    - name: "read packagelist"
+      ansible.builtin.include_vars:
+        file: "{{ packages_2_install }}"
+
+    - name: "install packages"
+      ansible.builtin.package:
+        name: "{{ item }}"
+      state: latest
+      loop: "{{ packages }}"
 
   rescue:
     - name: "role {{ ansible_role_name }} failed"
       ansible.builtin.fail:
-        msg: "error: during copy do files to {{ regular_home }}"
+        msg: "error: during installing packages on {{ ansible_hostname }}"
 

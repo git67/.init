@@ -1,2 +1,4 @@
 ---
 # defaults file for r_install_packages
+packages_2_install: "data/packages/install.yaml"
+packages_2_uninstall: "data/packages/uninstall.yaml"
