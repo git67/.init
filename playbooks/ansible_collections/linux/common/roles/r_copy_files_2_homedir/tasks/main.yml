@@ -1,6 +1,8 @@
 ---
 # tasks file for r_copy_files_2_homedir
 - name: "copy dot files to {{ lookup('env','HOME') }}"
+  vars:
+    separator: '\'
   tags:
     - copy_files_2_homedir
 
@@ -8,6 +10,7 @@
     - name: "set needed variables"
       ansible.builtin.set_fact:
         regular_user: "{{ ansible_env.SUDO_USER }}"
+        git_user: "{{ ansible_env.SUDO_USER.split(separator)[-1] }}"
         regular_hostname: "{{ ansible_hostname }}"
         regular_homedir: "{{ lookup('env','HOME') }}"
 

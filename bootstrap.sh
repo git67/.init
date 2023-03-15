@@ -1,6 +1,6 @@
 #!/usr/bin/env bash 
 
-set -euo pipefail
+#set -euo pipefail
 
 # ident "@(#)<bootstrap> <1.0>"
 #
@@ -36,7 +36,8 @@ PLAYBOOK="p_bootstrap.yml"
 
 # helper
 CMD=""
-FOUND=""
+FOUND="NONE"
+PUB="NONE"
 
 _line()
 {
@@ -53,22 +54,36 @@ _print()
 _create_ssh_key()
 {
 	_print "Erzeuge SSH Keys, soweit noetig ..."
-	if [ ! -f "${HOME}/.ssh/id_rsa" ];then
+	
+	[ -d ${HOME}/.ssh ] && PUB=$(ls ~/.ssh/ | grep '.pub')
+
+	if [ "${PUB}" == "NONE" ];then
 		_print "Erzeuge SSH Keys ..."
 		CMD="ssh-keygen -t rsa -b 4096  -f ~/.ssh/id_rsa -q -N '' <<< n ${SILENT}"
 		eval "${CMD}"
 
-		[ $? != 0 ] && _print "...Fehler bei ${CMD}" && exit 1	
-
-	fi
-
-	if [ -f ${HOME}/.ssh/authorized_keys ];then
-		FOUND=$(grep "$(cat  ${HOME}/.ssh/id_rsa.pub |awk '{print $2}')" ${HOME}/.ssh/authorized_keys)
-	fi
-
-	if [ "x${FOUND}" == "x" ]; then
+		[ $? != 0 ] && _print "... Fehler bei ${CMD}" && exit 1	
+	
+		_print "Schreibe ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys ..."
 		cat  ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 		chmod 600 ~/.ssh/authorized_keys
+	else
+		for PUB_KEY in ${PUB}
+		do
+			if [ -f ${HOME}/.ssh/authorized_keys ];then
+				FOUND=$(grep "$(cat ${HOME}/.ssh/${PUB_KEY} |awk '{print $2}')" ${HOME}/.ssh/authorized_keys)
+				if [ "x${FOUND}" == "x" ]; then
+					_print "Schreibe ~/.ssh/${PUB_KEY} >> ~/.ssh/authorized_keys ..."
+					cat  ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+					chmod 600 ~/.ssh/authorized_keys
+				fi
+
+			else
+				_print "Schreibe ~/.ssh/${PUB_KEY} >> ~/.ssh/authorized_keys ..."
+				cat  ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+				chmod 600 ~/.ssh/authorized_keys
+			fi
+		done
 	fi
 
 	_print "... ok"
@@ -128,16 +143,17 @@ _run_playbook()
 	CMD="ansible-playbook ${PL} -i ${INVENTORY} -e group_name=bootstrapnode --ask-become-pass ${SILENT}"
 	eval "${CMD}"
 
-	[ $? != 0 ] && _print "...Fehler bei ${CMD}" && exit 1	
+	[ $? != 0 ] && _print "... Fehler bei ${CMD}" && exit 1	
 
 	deactivate
 
 	_print "... ok"
 }
 
-
 # main
 [ ! "${-#*i}" == "$-" ] && _print "usage: $(basename ./$0)" && exit 1
+
+clear 
 
 _line
 

@@ -46,6 +46,12 @@
           tags:
             - copy_files_2_homedir
 
+        - name: "install selected packages"
+          ansible.builtin.include_role:
+            name: r_install_packages
+          tags:
+            - install_packages
+
       rescue:
         - name: "task {{ pl_name }} failed"
           ansible.builtin.fail:

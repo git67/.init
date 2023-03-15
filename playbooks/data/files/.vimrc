@@ -5,7 +5,6 @@ autocmd FileType yml setlocal ts=2 sts=2 sw=2 expandtab
 autocmd FileType py setlocal ts=4 sts=2 sw=2 expandtab autoident shiftwidth=4 cursorline showmatch number 
 
 let python_highlight_all = 1
-syntax enable
 
 if has("syntax")
   syntax on
@@ -18,4 +17,7 @@ set smartcase
 set incsearch
 set autowrite
 set hidden  
-set mouse=a
+
+if has("autocmd")
+  au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+endif

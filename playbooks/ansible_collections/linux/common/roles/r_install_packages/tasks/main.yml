@@ -12,7 +12,7 @@
     - name: "install packages"
       ansible.builtin.package:
         name: "{{ item }}"
-      state: latest
+        state: latest
       loop: "{{ packages }}"
 
   rescue:
