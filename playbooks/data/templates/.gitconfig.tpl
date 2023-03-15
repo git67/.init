@@ -1,6 +1,6 @@
 [user]
 	name = {{ git_user }}
-	email = {{ git_user }}@{{ regular_hostname }}.gisa.intern
+	email = {{ git_user }}@{{ regular_hostname }}.localhost
 	username = {{ git_user }}
 [core]
 	editor = vim
