@@ -1,4 +1,0 @@
----
-# defaults file for r_copy_files_2_homedir
-data_files: "data/files"
-data_templates: "data/templates"

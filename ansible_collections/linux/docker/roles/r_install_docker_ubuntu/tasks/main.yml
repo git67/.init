@@ -1,0 +1,64 @@
+---
+# tasks file for r_install_docker
+- name: "install docker runtime"
+  tags:
+    - install_docker
+
+  block:
+    - name: "update all packages"
+      ansible.builtin.apt:
+        name: "*"
+        update_cache: true
+        state: latest
+        force_apt_get: true
+
+    - name: "upgrade"
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: true
+      when: os_upgrade  == "true"
+
+    - name: "installing needed packages for install docker runtime"
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+      loop: "{{ required_packages4docker }}"
+
+    - name: "getting hostvars dict"
+      ansible.builtin.setup:
+
+    - name: "add an apt signing key for docker"
+      ansible.builtin.apt_key:
+        url: "{{ apt_key_url }}"
+        state: present
+      when: install_docker_from_origin == "true"
+
+    - name: "add stable docker repository "
+      ansible.builtin.apt_repository:
+       repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+       state: present
+       validate_certs: true
+      when: install_docker_from_origin == "true"
+
+    - name: "install docker runtime/cli"
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop: "{{ docker_packages }}"
+    
+    - name: "ensure docker service is running"
+      ansible.builtin.service:
+        name: docker
+        state: started 
+
+    #- name: "add user {{ regular_user }} to group docker"
+    #  ansible.builtin.user:
+    #    name: "{{ regular_user }}"
+    #    group: docker
+
+  rescue:
+    - name: "role {{ ansible_role_name }} failed"
+      ansible.builtin.fail:
+        msg: "error: during install docker"

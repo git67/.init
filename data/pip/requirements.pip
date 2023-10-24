@@ -1,0 +1,11 @@
+wheel
+pip
+ansible
+ansible-lint
+ansible-navigator
+flake8
+tox
+pylint
+pre-commit
+sphinx
+sphinx-rtd-theme

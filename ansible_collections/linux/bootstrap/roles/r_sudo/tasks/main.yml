@@ -1,0 +1,30 @@
+---
+# tasks file for r_sudo
+- name: "add local sudo role"
+  tags:
+    - sudo
+  vars:
+    sep: '\'
+    sudo_file: "{{ regular_user.split(sep)[-1] }}"
+
+  block:
+    - name: "create /etc/sudoers.d/{{ sudo_file }}"
+      ansible.builtin.file:
+        path: "/etc/sudoers.d/{{ sudo_file }}"
+        state: touch
+        mode: 0440
+        modification_time: preserve
+        access_time: preserve
+
+    - name: "add entry to  /etc/sudoers.d/{{ sudo_file }}"
+      ansible.builtin.lineinfile:
+        dest: "/etc/sudoers.d/{{ sudo_file }}"
+        state: present
+        regexp: "{{ regular_user.split(sep)[-1] }}"
+        line: "{{ regular_user + ' ALL=(ALL) NOPASSWD: ALL' }}"
+        validate: "visudo -cf %s"
+
+  rescue:
+    - name: "role {{ ansible_role_name }} failed"
+      ansible.builtin.fail:
+        msg: "create ansible user failed"

@@ -1,0 +1,8 @@
+packages:
+- apt-file 
+- wget
+- bind9-dnsutils
+- vim
+- sysstat
+- dstat
+- sshpass

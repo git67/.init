@@ -1,0 +1,20 @@
+---
+# defaults file for r_install_docker
+required_packages4docker:
+- apt-transport-https
+- ca-certificates
+- curl
+- software-properties-common
+- gnupg-agent
+
+apt_key_url: https://download.docker.com/linux/ubuntu/gpg
+
+docker_packages:
+- docker.io
+#- docker-ce
+#- docker-ce-cli
+#- containerd.io
+
+os_upgrade: "true"
+
+install_docker_from_origin: "false"

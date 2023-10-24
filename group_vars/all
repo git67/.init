@@ -1,0 +1,8 @@
+regular_user: "{{ ansible_env.SUDO_USER }}"
+regular_home: "/home/{{ regular_user }}"
+
+copy_files_2_homedir_data_files: "data/files"
+copy_files_2_homedir_data_templates: "data/templates"
+
+install_packages_packages_2_install: "data/packages/install.yaml"
+install_packages_packages_2_uninstall: "data/packages/uninstall.yaml"

@@ -1,0 +1,5 @@
+---
+# defaults file for r_sudo
+"{{ regular_user }}":
+  sudo_entry: "{{ regular_user }} ALL=(ALL) NOPASSWD: ALL"
+  sudo_file: "{{ regular_user }}"

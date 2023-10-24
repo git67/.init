@@ -1,0 +1,97 @@
+---
+- name: "configure local node {{ ansible_play_hosts|to_yaml }}"
+  hosts: "{{ group_name | default('bootstrapnode') }}"
+  collections:
+    - linux.bootstrap
+    - linux.docker
+  gather_facts: false
+  any_errors_fatal: true
+  ignore_unreachable: false
+  become: true
+  debugger: never
+  vars:
+    pl_name: "p_bootstrap.yml"
+
+##############################################
+
+  pre_tasks:
+    - block:
+        - name: "role check availibility"
+          include_role:
+            name: r_check_availability
+
+        - name: "role check node os"
+          ansible.builtin.include_role:
+            name: r_check_os
+
+        - name: "role create local facts"
+          ansible.builtin.include_role:
+            name: r_create_local_facts
+
+      rescue:
+        - name: "pre task {{ pl_name }} failed"
+          ansible.builtin.fail:
+            msg: "error during pre_tasks"
+
+      tags:
+        - always
+
+##############################################
+
+  tasks:
+    - block:
+        - name: "role copy dot files into users homedir"
+          ansible.builtin.include_role:
+            name: r_copy_files_2_homedir
+          vars:
+            data_files: "{{ copy_files_2_homedir_data_files }}"
+            data_templates: "{{ copy_files_2_homedir_data_templates }}"
+          tags:
+            - copy_files_2_homedir
+
+        - name: "install selected packages"
+          ansible.builtin.include_role:
+            name: r_install_packages
+          vars:
+            packages_2_install: "{{ install_packages_packages_2_install }}"
+            packages_2_uninstall: "{{ install_packages_packages_2_uninstall }}"
+          tags:
+            - install_packages
+
+        - name: "role install docker"
+          ansible.builtin.include_role:
+            name: r_install_docker_{{ runtime_dist }}
+          vars:
+            os_upgrade: "false"
+          tags:
+            - install_docker
+
+        - name: "add sudo role"
+          ansible.builtin.include_role:
+            name: r_sudo
+          tags:
+            - sudo
+
+      rescue:
+        - name: "task {{ pl_name }} failed"
+          ansible.builtin.fail:
+            msg: "error during main tasks"
+
+
+##############################################
+
+  post_tasks:
+    - block:
+        - name: "role write local state facts"
+          ansible.builtin.include_role:
+            name: r_write_local_state_facts
+
+      rescue:
+        - name: "post task {{ pl_name }} failed"
+          ansible.builtin.fail:
+            msg: "error during post_tasks"
+
+      tags:
+        - always
+
+##############################################

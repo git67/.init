@@ -1,5 +1,0 @@
-[bootstrapnode]
-gisu13555
-
-[all:vars]
-ansible_ssh_common_args='-o UserKnownHostsFile=/dev/null -o GSSAPIAuthentication=no -o StrictHostKeyChecking=no'
