@@ -11,9 +11,9 @@
 # ...
 
 # var
-# globals
 PATH="${PATH}:/:/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin"
 SILENT=${1:+'>/dev/null 2>&1'}
+
 export HOSTN=$(uname -n)
 export USERN=$(whoami|cut -d \\ -f2)
 
@@ -55,14 +55,26 @@ _print()
 	printf '\t%s\n' "${STR}"
 }
 
+_help()
+{
+	clear
+	[ -f ./README.md ] && cat ./README.md | sed -e '/^`/d' | more
+}
+
+_init()
+{
+	[ $(locale -a | grep -w "en_US.utf8")  ] && export LANG="en_US.utf8"
+	trap "_help;exit 1" 2
+}
+
 _create_ssh_key()
 {
-	_print "Erzeuge SSH Keys, soweit noetig ..."
+	_print "Erzeuge SSH Keypair, soweit noetig ..."
 	
 	[ -d ${HOME}/.ssh ] && PUB=$(ls ~/.ssh/ | grep '.pub')
 
 	if [ "${PUB}" == "NONE" ];then
-		_print "Erzeuge SSH Keys ..."
+		_print "Erzeuge SSH Keypair ..."
 		CMD="ssh-keygen -t rsa -b 4096  -f ~/.ssh/id_rsa -q -N '' <<< n ${SILENT}"
 		eval "${CMD}"
 
@@ -72,6 +84,7 @@ _create_ssh_key()
 		cat  ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 		chmod 600 ~/.ssh/authorized_keys
 	else
+		_print "SSH Keypair bereits vorhanden ..."
 		for PUB_KEY in ${PUB}
 		do
 			if [ -f ${HOME}/.ssh/authorized_keys ];then
@@ -169,22 +182,77 @@ _run_playbook()
 	_print "... ok"
 }
 
+_probe_mn()
+{
+	_print "Pruefe eingegebenen Node ${MN[${INDEX}]} ..."
+
+	local PINGHOST=${1:-"NO_HOST_GIVEN"}
+	local DEADLINE=${2:-"1"}
+	local TIMEOUT=${3:-"10"}
+
+	ping ${PINGHOST} -w ${DEADLINE} -W ${TIMEOUT} > /dev/null 2>&1 
+	[ $? != 0 ] && _print "... managed Node ${PINGHOST} ist nicht verfügbar oder nicht erreichbar" && return 1	
+	
+	_print "... ok"
+}
+	
+_add_managed_nodes_2_inventory()
+{
+	local NODELIST=${1:-"NO_NODES"}	
+	_print "Erweitere Ansible Inventory ${A_INVENTORY} um Nodes: ${NODELIST} ..."
+}
+
+_get_managed_nodes()
+{
+	_print "Zu nutzende managed Nodes eingeben ..."
+	_print "Beendigung mit Leereingabe ... "
+	declare -A MN_LIST
+	local INDEX=1
+	local NOT_FOUND="0"
+
+	while read -p "Managed Node ${INDEX}: " MN_LIST[${INDEX}]
+	do
+		if [ "${MN_LIST[${INDEX}]}" == "" ]; then
+			break
+		fi
+		
+		if [ "$(echo "${LAST_MN_LIST}"| grep -F -w ${MN_LIST[${INDEX}]})" != "" ]; then
+			_print "Managed Node ${MN_LIST[${INDEX}]} wurde bereits erfasst ..."
+			NOT_FOUND="1"
+		else
+			_probe_mn ${MN_LIST[${INDEX}]} 
+			NOT_FOUND="$?"
+		fi
+		
+		if [ "${NOT_FOUND}" == "0" ]; then 
+			LAST_MN_LIST=${MN_LIST[*]}
+			((INDEX+=1))
+		fi
+	done
+
+	_add_managed_nodes_2_inventory "${MN_LIST[*]}"
+}
+
+
 # main
 [ ! "${-#*i}" == "$-" ] && _print "usage: $(basename ./$0)" && exit 1
-
 clear 
 
 _line
 
-_create_ssh_key  
+_init
 
-_copy_pip_config
+#_create_ssh_key  
 
-_create_python_venv 
+#_copy_pip_config
 
-_template_ansible_inventory
+#_create_python_venv 
 
-_run_playbook ${A_PLAYBOOK}
+#_template_ansible_inventory
+
+#_run_playbook ${A_PLAYBOOK} 
+
+_get_managed_nodes
 
 _line
 

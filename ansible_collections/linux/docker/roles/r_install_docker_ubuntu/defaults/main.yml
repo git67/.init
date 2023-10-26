@@ -6,6 +6,7 @@ required_packages4docker:
 - curl
 - software-properties-common
 - gnupg-agent
+- containerd
 
 apt_key_url: https://download.docker.com/linux/ubuntu/gpg
 
