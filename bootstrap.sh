@@ -239,7 +239,7 @@ _get_managed_nodes()
 [ ! "${-#*i}" == "$-" ] && _print "usage: $(basename ./$0)" && exit 1
 clear 
 
-_line
+_line "#"
 
 _init "en_US.utf8"
 
