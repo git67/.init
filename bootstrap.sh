@@ -63,7 +63,8 @@ _help()
 
 _init()
 {
-	[ $(locale -a | grep -w "en_US.utf8")  ] && export LANG="en_US.utf8"
+	local LOC=${1:-"C"}
+	[ $(locale -a | grep -w "${LOC}")  ] && export LANG="${LOC}"
 	trap "_help;exit 1" 2
 }
 
@@ -240,7 +241,7 @@ clear
 
 _line
 
-_init
+_init "en_US.utf8"
 
 #_create_ssh_key  
 
