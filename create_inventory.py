@@ -8,8 +8,7 @@ import json
 import click
 import jinja2
 
-inventoryTemplate = """
-[{{ groupname }}]
+inventoryTemplate = """[{{ groupname }}]
 {%- for host in hostnames %}
 {{ host }}
 {%- endfor %}
@@ -25,7 +24,7 @@ def render_inventory(hostNames, outputFilename, groupName, template):
 
         with open(outputFilename, 'w') as outFile:
             outFile.write(renderInventory)
-        
+
         rResult = "Inventory " + str(outputFilename) + " geschrieben"
 
     except jinja2.TemplateError as jinja2Error:
@@ -47,7 +46,6 @@ def handleArg(mnlist, inventoryfile, groupname):
     """
     Click Function Handler
     """
-    #rResult=render_inventory(mnlist, inventoryfile, groupname, inventoryTemplate)
     return click.echo(render_inventory(mnlist, inventoryfile, groupname, inventoryTemplate))
 
 def main():
