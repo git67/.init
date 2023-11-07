@@ -1,5 +1,6 @@
 #!/usr/bin/env bash 
 #set -euo pipefail
+#set -x
 
 # ident "@(#)<bootstrap> <1.0>"
 #
@@ -38,11 +39,8 @@ A_INVENTORYTPL="${S_TA_PLDIR}/hosts.tpl"
 A_DATADIR="${A_PLDIR}/data"
 A_PLAYBOOK="p_bootstrap.yml"
 
-# helper
-CMD=""
-FOUND="NONE"
-PUB="NONE"
-
+# _line <char> 
+# z.b _line "#"
 _line()
 {
 	CHAR=${1:-"-"}
@@ -61,6 +59,8 @@ _help()
 	[ -f ./README.md ] && cat ./README.md | sed -e '/^`/d' | more
 }
 
+# _init <locale>
+# z.b. _init "en_US.utf8"
 _init()
 {
 	local LOC=${1:-"C"}
@@ -72,6 +72,10 @@ _create_ssh_key()
 {
 	_print "Erzeuge SSH Keypair, soweit noetig ..."
 	
+	local PUB="NONE"
+	local FOUND="NONE"
+	local CMD=""
+
 	[ -d ${HOME}/.ssh ] && PUB=$(ls ~/.ssh/ | grep '.pub')
 
 	if [ "${PUB}" == "NONE" ];then
@@ -106,25 +110,38 @@ _create_ssh_key()
 	_print "... ok"
 }
 
+# _copy_pip_config <pip config dir> <pip configfile> <pip config source dir>
+# _copy_pip_config ${V_PIPCONFDIR} ${V_PIPCONFFILE} ${S_PIPDIR}
 _copy_pip_config()
 {
 	_print "Kopiere pip Konfig File ..."
+
+        local PIPCONFDIR=${1:-"NONE"}
+        local PIPCONFFILE=${2:-"NONE"}
+        local PIPDIR=${3:-"NONE"}
+
 	cd 
 
-	if [ ! -d ${V_PIPCONFDIR} ]; then
-		mkdir -p ${V_PIPCONFDIR}
+	if [ ! -d ${PIPCONFDIR} ]; then
+		mkdir -p ${PIPCONFDIR}
 	fi
 
-	if [ ! -f ${V_PIPCONFDIR}/${V_PIPCONFFILE} ]; then
-		cp ${S_PIPDIR}/${V_PIPCONFFILE} ${V_PIPCONFDIR}
+	if [ ! -f ${PIPCONFDIR}/${PIPCONFFILE} ]; then
+		cp ${PIPDIR}/${PIPCONFFILE} ${PIPCONFDIR}
 	fi
 
 	_print "... ok"
 }
 
+# _create_python_venv <full qualifiedname venv> <pip config source dir> 
+# _create_python_venv ${VENV} ${S_PIPDIR}
 _create_python_venv()
 {
 	_print "Erzeuge Python 3 ${VENV} ..."
+	
+	local VENV=${1:-"NONE"}
+        local PIPDIR=${2:-"NONE"}
+
 	python3 -m venv ${VENV}
 
 	_print "Aktiviere Python3 ${VENV} ..."
@@ -143,6 +160,7 @@ _create_python_venv()
 	_print "... ok"
 }
 
+
 _template_ansible_inventory()
 {
 	_print "Template Ansible Inventory ..."
@@ -158,9 +176,10 @@ _template_ansible_inventory()
 
 _run_playbook()
 {
-	PL=${1:-"undef"}
 	_print "Starte Ansible playbook ${PL} ..."
 
+	local PL=${1:-"undef"}
+	local CMD=""
 
 	if [ ! -f ${A_PLDIR}/${PL} ]; then
 		_print "Playbook ${A_PLDIR}/${PL} nicht vorhanden."
@@ -200,6 +219,7 @@ _probe_mn()
 _add_managed_nodes_2_inventory()
 {
 	local NODELIST=${1:-"NO_NODES"}	
+	NODELIST=$(echo "${NODELIST}"|sed -e 's/\s\+/,/g')
 	_print "Erweitere Ansible Inventory ${A_INVENTORY} um Nodes: ${NODELIST} ..."
 }
 
@@ -207,20 +227,23 @@ _get_managed_nodes()
 {
 	_print "Zu nutzende managed Nodes eingeben ..."
 	_print "Beendigung mit Leereingabe ... "
-	declare -A MN_LIST
-	local INDEX=1
+	declare -a MN_LIST 
+	local INDEX=0
 	local NOT_FOUND="0"
+	local MN=""
 
-	while read -p "Managed Node ${INDEX}: " MN_LIST[${INDEX}]
+	#while read -p "Managed Node ${INDEX}: " MN_LIST[${INDEX}]
+	while read -p "Managed Node ${INDEX}: " MN
 	do
-		if [ "${MN_LIST[${INDEX}]}" == "" ]; then
+		if [ "${MN}" == "" ]; then
 			break
 		fi
 		
-		if [ "$(echo "${LAST_MN_LIST}"| grep -F -w ${MN_LIST[${INDEX}]})" != "" ]; then
+		if [ "$(echo "${LAST_MN_LIST}"| grep -F -w ${MN})" != "" ]; then
 			_print "Managed Node ${MN_LIST[${INDEX}]} wurde bereits erfasst ..."
 			NOT_FOUND="1"
 		else
+			MN_LIST=("${MN_LIST[@]:0:$INDEX}" "$MN")
 			_probe_mn ${MN_LIST[${INDEX}]} 
 			NOT_FOUND="$?"
 		fi
@@ -245,13 +268,13 @@ _init "en_US.utf8"
 
 _create_ssh_key  
 
-#_copy_pip_config
+#_copy_pip_config ${V_PIPCONFDIR} ${V_PIPCONFFILE} ${S_PIPDIR}
 
-_create_python_venv 
+#_create_python_venv ${VENV} ${S_PIPDIR}
 
-_template_ansible_inventory
+#_template_ansible_inventory
 
-_run_playbook ${A_PLAYBOOK} 
+#_run_playbook ${A_PLAYBOOK} 
 
 _get_managed_nodes
 

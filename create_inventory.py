@@ -4,7 +4,7 @@
 
 import os
 import sys
-import json
+#import json
 import click
 import jinja2
 
@@ -12,6 +12,9 @@ inventoryTemplate = """[{{ groupname }}]
 {%- for host in hostnames %}
 {{ host }}
 {%- endfor %}
+
+[all:vars]
+ansible_ssh_common_args='-o UserKnownHostsFile=/dev/null -o GSSAPIAuthentication=no -o StrictHostKeyChecking=no'
 """
 
 def render_inventory(hostNames, outputFilename, groupName, template):
@@ -35,18 +38,25 @@ def render_inventory(hostNames, outputFilename, groupName, template):
 
     except Exception as genericError:
         rResult = "Ein generischer Fehler ist aufgetreten: " + str(genericError)
-    
+
     return rResult
 
 @click.command()
-@click.option('--mnlist', '-m', required=True, help='List of managed Nodes', multiple=True)
-@click.option('--inventoryfile', '-f', required=True, help='Name of Inventory')
-@click.option('--groupname', '-g', required=True, help='Iventory groupname')
+#@click.option('--mnlist', '-m', required=True, help='List of managed Nodes', multiple=True)
+@click.option('--mnlist', '-m', required=True, help='Kommaseparierte Liste der managed Nodes', type=click.STRING)
+@click.option('--inventoryfile', '-f', required=True, help='Name des Inventoryfile')
+@click.option('--groupname', '-g', required=True, help='Name der Iventorygruppe')
 def handleArg(mnlist, inventoryfile, groupname):
     """
     Click Function Handler
+
+    z.B.:
+
+    # create_inventory.py -m host1,host2,host3 -g linuxnodes -f hosts
     """
-    return click.echo(render_inventory(mnlist, inventoryfile, groupname, inventoryTemplate))
+
+    a_mnlist=mnlist.split(',')
+    return click.echo(render_inventory(a_mnlist, inventoryfile, groupname, inventoryTemplate))
 
 def main():
     return(handleArg())
