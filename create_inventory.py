@@ -15,14 +15,6 @@ inventoryTemplate = """
 {%- endfor %}
 """
 
-def error_message(message):
-    """
-    Anzeige der Fehlermeldung nach STDOUT
-    Args:
-    message (str): Die anzuzeigende Fehlermeldung
-    """
-    print(f"Error: {str(message)}")
-
 def render_inventory(hostNames, outputFilename, groupName, template):
     try:
         j2Env = jinja2.Environment(loader=jinja2.BaseLoader())
@@ -34,20 +26,18 @@ def render_inventory(hostNames, outputFilename, groupName, template):
         with open(outputFilename, 'w') as outFile:
             outFile.write(renderInventory)
         
-        rResult = 0
-        print(f'Inventory successfully written to {outputFilename}')
+        rResult = "Inventory " + str(outputFilename) + " geschrieben"
 
-    except jinja2.TemplateError as e:
-        print(f"Jinja2 template error: {e}")
-        rResult = 1
+    except jinja2.TemplateError as jinja2Error:
+        rResult = "Jinja2 Template Fehler: " + str(jinja2Error)
 
     except FileNotFoundError:
-        print(f"Error: Unable to open or create the file '{outputFilename}'")
-        rResult = 1
+        rResult = "Fehler bei Schreiben von Inventoryfile " + outputFilename
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        rResult = 1
+    except Exception as genericError:
+        rResult = "Ein generischer Fehler ist aufgetreten: " + str(genericError)
+    
+    return rResult
 
 @click.command()
 @click.option('--mnlist', '-m', required=True, help='List of managed Nodes', multiple=True)
@@ -57,11 +47,11 @@ def handleArg(mnlist, inventoryfile, groupname):
     """
     Click Function Handler
     """
-    return render_inventory(mnlist, inventoryfile, groupname, inventoryTemplate)
+    #rResult=render_inventory(mnlist, inventoryfile, groupname, inventoryTemplate)
+    return click.echo(render_inventory(mnlist, inventoryfile, groupname, inventoryTemplate))
 
 def main():
-    return handleArg()
-
+    return(handleArg())
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit((main()))
