@@ -243,15 +243,15 @@ _line "#"
 
 _init "en_US.utf8"
 
-#_create_ssh_key  
+_create_ssh_key  
 
 #_copy_pip_config
 
-#_create_python_venv 
+_create_python_venv 
 
-#_template_ansible_inventory
+_template_ansible_inventory
 
-#_run_playbook ${A_PLAYBOOK} 
+_run_playbook ${A_PLAYBOOK} 
 
 _get_managed_nodes
 
