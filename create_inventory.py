@@ -4,7 +4,6 @@
 
 import os
 import sys
-#import json
 import click
 import jinja2
 
@@ -42,7 +41,6 @@ def render_inventory(hostNames, outputFilename, groupName, template):
     return rResult
 
 @click.command()
-#@click.option('--mnlist', '-m', required=True, help='List of managed Nodes', multiple=True)
 @click.option('--mnlist', '-m', required=True, help='Kommaseparierte Liste der managed Nodes', type=click.STRING)
 @click.option('--inventoryfile', '-f', required=True, help='Name des Inventoryfile')
 @click.option('--groupname', '-g', required=True, help='Name der Iventorygruppe')

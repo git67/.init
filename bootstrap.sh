@@ -221,6 +221,7 @@ _add_managed_nodes_2_inventory()
 	local NODELIST=${1:-"NO_NODES"}	
 	NODELIST=$(echo "${NODELIST}"|sed -e 's/\s\+/,/g')
 	_print "Erweitere Ansible Inventory ${A_INVENTORY} um Nodes: ${NODELIST} ..."
+	./create_inventory.py -m ${NODELIST} -g linux -f hs
 }
 
 _get_managed_nodes()
@@ -240,15 +241,15 @@ _get_managed_nodes()
 		fi
 		
 		if [ "$(echo "${LAST_MN_LIST}"| grep -F -w ${MN})" != "" ]; then
-			_print "Managed Node ${MN_LIST[${INDEX}]} wurde bereits erfasst ..."
+			_print "Managed Node ${MN} wurde bereits erfasst ..."
 			NOT_FOUND="1"
 		else
-			MN_LIST=("${MN_LIST[@]:0:$INDEX}" "$MN")
-			_probe_mn ${MN_LIST[${INDEX}]} 
+			_probe_mn ${MN} 
 			NOT_FOUND="$?"
 		fi
 		
 		if [ "${NOT_FOUND}" == "0" ]; then 
+			MN_LIST=("${MN_LIST[@]:0:${INDEX}}" "${MN}")
 			LAST_MN_LIST=${MN_LIST[*]}
 			((INDEX+=1))
 		fi
