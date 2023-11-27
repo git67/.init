@@ -2,7 +2,7 @@
 #set -euo pipefail
 #set -x
 
-# ident "@(#)<bootstrap> <1.0>"
+# ident "@(#)<bootstrap> <0.9>"
 #
 # desc          : <Bootstrap User Env>
 # version       : <0.9>
@@ -160,14 +160,19 @@ _create_python_venv()
 	_print "... ok"
 }
 
-
+# _template_ansible_inventory <inventory dir> <inventory file> <hostname>
+# _template_ansible_inventory "inventories" "hosts" "hostname"
 _template_ansible_inventory()
 {
 	_print "Template Ansible Inventory ..."
 	
-	mkdir -p ${A_INVDIR}
+	local INVDIR=${1:-"inventories"}
+	local INVFILE=${2:-"hosts"}
+	local HOST=${3:-"$(uname -n)"}
 	
-	envsubst < ${A_INVENTORYTPL} > ${A_INVENTORY} 	
+	mkdir -p ${INVDIR}
+	
+	./create_inventory.py -m ${HOST} -g bootstrapnode -f ${INVDIR}/${INVFILE}
 
 	_print "... ok"
 }
@@ -219,9 +224,13 @@ _probe_mn()
 _add_managed_nodes_2_inventory()
 {
 	local NODELIST=${1:-"NO_NODES"}	
+	local GROUP_NAME=${2:-"linux"}	
+	local INVENTORY=${3:-"inventories/mn_hosts"}	
+
+
 	NODELIST=$(echo "${NODELIST}"|sed -e 's/\s\+/,/g')
 	_print "Erweitere Ansible Inventory ${A_INVENTORY} um Nodes: ${NODELIST} ..."
-	./create_inventory.py -m ${NODELIST} -g linux -f hs
+	./create_inventory.py -m ${NODELIST} -g ${GROUP_NAME} -f ${INVENTORY}
 }
 
 _get_managed_nodes()
@@ -233,7 +242,6 @@ _get_managed_nodes()
 	local NOT_FOUND="0"
 	local MN=""
 
-	#while read -p "Managed Node ${INDEX}: " MN_LIST[${INDEX}]
 	while read -p "Managed Node ${INDEX}: " MN
 	do
 		if [ "${MN}" == "" ]; then
@@ -273,7 +281,7 @@ _create_ssh_key
 
 #_create_python_venv ${VENV} ${S_PIPDIR}
 
-#_template_ansible_inventory
+_template_ansible_inventory
 
 #_run_playbook ${A_PLAYBOOK} 
 
