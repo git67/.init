@@ -160,8 +160,8 @@ _create_python_venv()
 	_print "... ok"
 }
 
-# _template_ansible_inventory <inventory dir> <inventory file> <hostname>
-# _template_ansible_inventory "inventories" "hosts" "hostname"
+# _template_ansible_inventory <inventory dir> <inventory file> <hostname> <inventory groupname>
+# _template_ansible_inventory "inventories" "hosts" "hostname" "bootstrapnode"
 _template_ansible_inventory()
 {
 	_print "Template Ansible Inventory ..."
@@ -169,10 +169,11 @@ _template_ansible_inventory()
 	local INVDIR=${1:-"inventories"}
 	local INVFILE=${2:-"hosts"}
 	local HOST=${3:-"$(uname -n)"}
+	local GROUP=${4:-"bootstrapnode"}
 	
 	mkdir -p ${INVDIR}
 	
-	./create_inventory.py -m ${HOST} -g bootstrapnode -f ${INVDIR}/${INVFILE}
+	./create_inventory.py -m ${HOST} -g ${GROUP} -f ${INVDIR}/${INVFILE}
 
 	_print "... ok"
 }
@@ -184,6 +185,8 @@ _run_playbook()
 	_print "Starte Ansible playbook ${PL} ..."
 
 	local PL=${1:-"undef"}
+	local INV=${2:-"undef"}
+	local GROUP=${3:-"undef"}
 	local CMD=""
 
 	if [ ! -f ${A_PLDIR}/${PL} ]; then
@@ -197,7 +200,7 @@ _run_playbook()
 	
 	mkdir -p ${A_PLDIR}/log
 
-	CMD="ansible-playbook ${PL} -i ${A_INVENTORY} -e group_name=bootstrapnode --ask-become-pass ${SILENT}"
+	CMD="ansible-playbook ${PL} -i ${INV} -e group_name=${GROUP} --ask-become-pass ${SILENT}"
 	eval "${CMD}"
 
 	[ $? != 0 ] && _print "... Fehler bei ${CMD}" && exit 1	
@@ -227,10 +230,11 @@ _add_managed_nodes_2_inventory()
 	local GROUP_NAME=${2:-"linux"}	
 	local INVENTORY=${3:-"inventories/mn_hosts"}	
 
-
 	NODELIST=$(echo "${NODELIST}"|sed -e 's/\s\+/,/g')
-	_print "Erweitere Ansible Inventory ${A_INVENTORY} um Nodes: ${NODELIST} ..."
-	./create_inventory.py -m ${NODELIST} -g ${GROUP_NAME} -f ${INVENTORY}
+	if [ "${NODELIST}" != "NO_NODES" ]; then
+		_print "Erweitere Ansible Inventory ${A_INVENTORY} um Nodes: ${NODELIST} ..."
+		./create_inventory.py -m ${NODELIST} -g ${GROUP_NAME} -f ${INVENTORY}
+	fi
 }
 
 _get_managed_nodes()
@@ -279,11 +283,11 @@ _create_ssh_key
 
 #_copy_pip_config ${V_PIPCONFDIR} ${V_PIPCONFFILE} ${S_PIPDIR}
 
-#_create_python_venv ${VENV} ${S_PIPDIR}
+_create_python_venv ${VENV} ${S_PIPDIR}
 
-_template_ansible_inventory
+_template_ansible_inventory "inventories" "hosts" "${HOSTN}" "bootstrapnode"
 
-#_run_playbook ${A_PLAYBOOK} 
+_run_playbook ${A_PLAYBOOK} "inventories/hosts" "bootstrapnode" 
 
 _get_managed_nodes
 
