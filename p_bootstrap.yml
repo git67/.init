@@ -4,6 +4,7 @@
   collections:
     - linux.bootstrap
     - linux.docker
+    - linux.update
   gather_facts: false
   any_errors_fatal: true
   ignore_unreachable: false
@@ -58,11 +59,17 @@
           tags:
             - install_packages
 
+        - name: "role update linux"
+          ansible.builtin.include_role:
+            name: r_update_all_{{ runtime_dist_flag }}
+          vars:
+            os_upgrade: "false"
+          tags:
+            - update_all
+
         - name: "role install docker"
           ansible.builtin.include_role:
             name: r_install_docker_{{ runtime_dist }}
-          vars:
-            os_upgrade: "false"
           tags:
             - install_docker
 

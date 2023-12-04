@@ -1,0 +1,32 @@
+# tasks file for r_deploy_ssh_keys
+- name: "deploy ssh key-pairs"
+  tags:
+    - deploy_ssh_keys
+
+  block:
+    - name: "add public key to ~/.ssh/authorized_keys"
+      ansible.posix.authorized_key:
+        user: "{{ ansible.name }}"
+        key: "{{ lookup('file', ansible.pub_key_file) }}"
+        state: present
+
+    - name: "create /etc/sudoers.d/{{ ansible.sudo_file }}"
+      ansible.builtin.file:
+        path: "/etc/sudoers.d/{{ ansible.sudo_file }}"
+        state: touch
+        mode: "0644"
+        modification_time: preserve
+        access_time: preserve
+
+    - name: "add entry {{ ansible.sudo_entry }} to  /etc/sudoers.d/{{ ansible.sudo_file }}"
+      ansible.builtin.lineinfile:
+        dest: "/etc/sudoers.d/{{ ansible.sudo_file }}"
+        state: present
+        regexp: "^{{ ansible.name }}"
+        line: "{{ ansible.sudo_entry }}"
+        validate: "visudo -cf %s"
+
+  rescue:
+    - name: "role {{ ansible_role_name }} failed"
+      ansible.builtin.fail:
+        msg: "deloy ssh key-pairs failed"

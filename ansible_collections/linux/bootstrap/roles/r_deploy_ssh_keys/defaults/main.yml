@@ -1,0 +1,7 @@
+---
+# defaults file for r_create_ansible_user
+ansible:
+  name: "{{ regular_user }}"
+  sudo_entry: "ansible ALL=(ALL) NOPASSWD: ALL"
+  pub_key_file: "{{ regular_home }}/.ssh/id_rsa.pub"
+  sudo_file: "{{ regular_user }}"

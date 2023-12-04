@@ -291,6 +291,8 @@ _run_playbook ${A_PLAYBOOK} "inventories/hosts" "bootstrapnode"
 
 _get_managed_nodes
 
+_run_playbook p_distribute_ssh_keys.yml "inventories/mn_hosts" "linux" 
+
 _line
 
 exit 0
